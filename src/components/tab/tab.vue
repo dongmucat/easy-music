@@ -20,19 +20,19 @@
       return {
         tabs: [
           {
-            name: '推荐',
+            name: '推 荐',
             path: '/recommend'
           },
           {
-            name: '歌手',
+            name: '歌 手',
             path: '/singer'
           },
           {
-            name: '排行',
+            name: '排 行',
             path: '/top-list'
           },
           {
-            name: '搜索',
+            name: '搜 索',
             path: '/search'
           }
         ]
