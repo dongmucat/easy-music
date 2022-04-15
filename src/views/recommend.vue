@@ -25,7 +25,7 @@
                 <img
                   width="60"
                   height="60"
-                  :src="item.pic"
+                  v-lazy="item.pic"
                 >
               </div>
               <div class="text">
@@ -58,7 +58,6 @@ export default {
     const result = await getRecommend()
     this.sliders = result.sliders
     this.albums = result.albums
-    console.log(this.albums);
   },
   data() {
     return {
