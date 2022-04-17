@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend" v-loading="loading">
+  <div class="recommend" v-loading:[loadingText]="loading">
     <scroll class="recommend-content">
       <div>
         <div class="slider-wrapper">
@@ -63,6 +63,7 @@ export default {
     return {
       sliders: [],
       albums: [],
+      loadingText:'正在载入,请稍等~~~'
     }
   },
   computed: {
