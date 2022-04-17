@@ -5,7 +5,7 @@
         v-for="group in data"
         :key="group.title"
         class="group"
-      ></li>
+      >
       <h2 class="title">{{group.title}}</h2>
         <ul>
           <li
@@ -17,12 +17,13 @@
             <span class="name">{{item.name}}</span>
           </li>
         </ul>
+        </li>
     </ul>
   </scroll>
 </template>
 
 <script>
-import Scroll from '@/components/wrap-scroll/index'
+import Scroll from '@/components/base/scroll/scroll'
 export default {
   name: 'index-list',
   components: {
