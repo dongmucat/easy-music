@@ -4,7 +4,7 @@ export default function useFixed(props) {
     const groupRef = ref(null)
     const listHeights = ref([])
     const scrollY = ref(0)
-    const currenIndex = ref(0)
+    const currentIndex = ref(0)
     const distance = ref(0)
 
     const fixedTitle = computed(() => {
@@ -12,7 +12,7 @@ export default function useFixed(props) {
         if (scrollY.value < 0) {
             return ''
         }
-        const currentGroup = props.data[currenIndex.value]
+        const currentGroup = props.data[currentIndex.value]
         return currentGroup ? currentGroup.title : ''
     })
     //计算标题顶上去的样式
@@ -40,7 +40,7 @@ export default function useFixed(props) {
             const heightTop = listHeightsVal[index]
             const heightBottom = listHeightsVal[index + 1]
             if (newValue >= heightTop && newValue <= heightBottom) {
-                currenIndex.value = index
+                currentIndex.value = index
                 distance.value = heightBottom - newValue
             }
         }
@@ -70,6 +70,7 @@ export default function useFixed(props) {
         groupRef,
         onScroll,
         fixedTitle,
-        fixedStyle
+        fixedStyle,
+        currentIndex
     }
 }
