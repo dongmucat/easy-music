@@ -13,6 +13,8 @@
 import { getSingerDetail } from '@/service/singer'
 import { processSongs } from '@/service/song'
 import MusicList from '../components/music-list/music-list.vue'
+import storage from 'good-storage'
+import { SINGER_KEY } from '@/assets/js/constant'
 export default {
   name: 'singer-detail',
   components: {
@@ -20,8 +22,8 @@ export default {
   },
   data() {
     return {
-      songs:[],
-      loading:true
+      songs: [],
+      loading: true
     }
   },
   props: {
@@ -33,16 +35,41 @@ export default {
     }
   },
   async created() {
-    const result = await getSingerDetail(this.singer)
+    /* 如果缓存也为空,做一层保护，跳转到一级路由 */
+    if(!this.computedSinger){
+      const path = this.$route.matched[0].path
+      this.$router.push({
+        path:path
+      })
+      return
+    }
+    const result = await getSingerDetail(this.computedSinger)
     this.songs = await processSongs(result.songs)
     this.loading = false
+    
   },
-  computed:{
-    pic(){
-      return this.singer && this.singer.pic
+  computed: {
+    computedSinger() {
+      let res = null
+      const singer = this.singer
+      /* 判断singer是否传进来 */
+      if (singer) {
+        res = singer
+      } else {
+        const cachedSinger = storage.session.get(SINGER_KEY)
+        if (cachedSinger && cachedSinger.mid === this.$route.params.id) {
+          res = cachedSinger
+        }
+      }
+      return res
     },
-    title(){
-      return this.singer && this.singer.name
+    pic() {
+      const singer = this.computedSinger
+      return singer && singer.pic
+    },
+    title() {
+      const singer = this.computedSinger
+      return singer && singer.name
     }
   }
 }

@@ -132,6 +132,7 @@ export default {
       let blur = 0
       const scrollY = this.scrollY
       const imageHeight = this.imageHeight
+      /* 往上推的时候 */
       if (scrollY >= 0) {
         blur = Math.min(this.maxTranslateY / imageHeight, scrollY / imageHeight) * 20
       }
