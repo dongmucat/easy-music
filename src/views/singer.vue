@@ -1,12 +1,24 @@
 <template>
-  <div class="singer">
+  <div
+    class="singer"
+    v-loading="!singers.length"
+  >
     <index-list
       :data="singers"
-      v-loading:[loadingText]="loading"
       @select="selectSinger"
     ></index-list>
+    <router-view v-slot="{ Component }">
+      <transition
+        appear
+        name="slide"
+      >
+        <component
+          :is="Component"
+          :singer="selectedSinger"
+        />
+      </transition>
+    </router-view>
   </div>
-  <router-view :singer="selectedSinger"></router-view>
 </template>
 
 <script>
@@ -44,8 +56,8 @@ export default {
         path: `/singer/${singer.mid}`
       })
     },
-    cacheSinger(singer){
-      storage.session.set(SINGER_KEY,singer)
+    cacheSinger(singer) {
+      storage.session.set(SINGER_KEY, singer)
     }
   },
 }
