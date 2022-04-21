@@ -34,6 +34,7 @@
       class="list"
       :style="scrollStyle"
       v-loading="loading"
+      v-no-result:[noResultText]="noResult"
       :probe-type="3"
       @scroll="onScroll"
     >
@@ -82,6 +83,7 @@ export default {
   },
   computed: {
     noResult() {
+      /* loding结束后且songs为空 */
       return !this.loading && !this.songs.length
     },
     playBtnStyle() {
