@@ -39,7 +39,9 @@
       @scroll="onScroll"
     >
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs"
+        @select="selectItem"
+        ></song-list>
       </div>
     </scroll>
   </div>
