@@ -17,8 +17,33 @@
         <h1 class="title">{{currentSong.name}}</h1>
         <h2 class="subtitle">{{currentSong.singer}}</h2>
       </div>
+      <div class="bottom">
+        <div class="operators">
+          <div class="icon i-left">
+            <i class="icon-sequence"></i>
+          </div>
+          <div class="icon i-left">
+            <i class="icon-prev"></i>
+          </div>
+          <div class="icon i-center">
+            <i
+              :class="playIcon"
+              @click="togglePlay"
+            ></i>
+          </div>
+          <div class="icon i-right">
+            <i class="icon-next"></i>
+          </div>
+          <div class="icon i-right">
+            <i class="icon-not-favorite"></i>
+          </div>
+        </div>
+      </div>
     </div>
-    <audio ref="audioRef"></audio>
+    <audio
+      ref="audioRef"
+      @pause="pause"
+    ></audio>
   </div>
 </template>
 
@@ -31,12 +56,17 @@ export default {
 
   },
   setup(props) {
+    /* data */
     const audioRef = ref(null)
-    /* 获取store */
+    /* vuex */
     const store = useStore()
     /* 计算属性 */
     const fullScreen = computed(() => store.state.fullScreen)
+    const playing = computed(() => store.state.playing)
     const currentSong = computed(() => store.getters.currentSong)
+    const playIcon = computed(() => {
+      return playing.value ? 'icon-pause' : 'icon-play'
+    })
     /* 监视 */
     watch(currentSong, (newSong) => {
       if (!newSong.id && !newSong.url) {
@@ -47,18 +77,32 @@ export default {
       audioEl.play()
     })
 
+    watch(playing, (newPlaying) => {
+      const audioEl = audioRef.value
+      newPlaying ? audioEl.play() : audioEl.pause()
+    })
+
     // methods
     function goBack() {
       store.commit('setFullScreen', false)
+    }
+    function togglePlay() {
+      store.commit('setPlayingState', !playing.value)
+    }
+    function pause() {
+      store.commit('setPlayingState', false)
     }
     return {
       /* 计算属性 */
       fullScreen,
       currentSong,
+      playIcon,
       /* watch */
       audioRef,
-      /* func */
-      goBack
+      /* methods */
+      goBack,
+      togglePlay,
+      pause
     }
   }
 }
