@@ -22,19 +22,19 @@
           <div class="icon i-left">
             <i class="icon-sequence"></i>
           </div>
-          <div class="icon i-left">
+          <div class="icon i-left" :class="disableCls">
             <i
               class="icon-prev"
               @click="prev"
             ></i>
           </div>
-          <div class="icon i-center">
+          <div class="icon i-center" :class="disableCls">
             <i
               :class="playIcon"
               @click="togglePlay"
             ></i>
           </div>
-          <div class="icon i-right">
+          <div class="icon i-right" :class="disableCls">
             <i
               class="icon-next"
               @click="next"
@@ -49,6 +49,8 @@
     <audio
       ref="audioRef"
       @pause="pause"
+      @canplay="ready"
+      @error="error"
     ></audio>
   </div>
 </template>
@@ -61,96 +63,121 @@ export default {
   components: {},
   setup(props) {
     /* data */
-    const audioRef = ref(null);
+    const audioRef = ref(null)
+    const songReady = ref(false)
     /* vuex */
-    const store = useStore();
+    const store = useStore()
     /* computed*/
-    const fullScreen = computed(() => store.state.fullScreen);
-    const playing = computed(() => store.state.playing);
-    const currentSong = computed(() => store.getters.currentSong);
+    const fullScreen = computed(() => store.state.fullScreen)
+    const playing = computed(() => store.state.playing)
+    const currentSong = computed(() => store.getters.currentSong)
     const playIcon = computed(() => {
-      return playing.value ? "icon-pause" : "icon-play";
+      return playing.value ? "icon-pause" : "icon-play"
     });
-    const currentIndex = computed(() => store.state.currentIndex);
-    const playlist = computed(() => store.state.playlist);
+    const currentIndex = computed(() => store.state.currentIndex)
+    const playlist = computed(() => store.state.playlist)
+    const disableCls = computed(()=>{
+        return songReady.value ? '': 'disable'
+    })
 
     /* 监视 */
     watch(currentSong, newSong => {
       if (!newSong.id && !newSong.url) {
-        return;
+        return
       }
-      const audioEl = audioRef.value;
-      audioEl.src = newSong.url;
-      audioEl.play();
+      /* 歌曲发生变化的时候songReady.value为false */
+      songReady.value = false
+      const audioEl = audioRef.value
+      audioEl.src = newSong.url
+      audioEl.play()
     });
 
     watch(playing, newPlaying => {
-      const audioEl = audioRef.value;
-      newPlaying ? audioEl.play() : audioEl.pause();
+      /* 当songReady为false时候，什么都不做直接返回 */
+      if (!songReady.value) {
+        return
+      }
+      const audioEl = audioRef.value
+      newPlaying ? audioEl.play() : audioEl.pause()
     });
 
     // methods
     function goBack() {
-      store.commit("setFullScreen", false);
+      store.commit("setFullScreen", false)
     }
 
     function togglePlay() {
-      store.commit("setPlayingState", !playing.value);
+        if (!songReady.value) {
+            return
+        }
+      store.commit("setPlayingState", !playing.value)
     }
 
     function pause() {
-      store.commit("setPlayingState", false);
+      store.commit("setPlayingState", false)
     }
 
     function prev() {
       /* 环形播放 */
-      const list = playlist.value;
-      if (!list.length) {
-        return;
+      const list = playlist.value
+      if (!songReady.value || !list.length) {
+        return
       }
       /* 只有一首歌的情况 */
       if (list.length === 1) {
-        loop();
+        loop()
       } else {
-        let index = currentIndex.value - 1;
+        let index = currentIndex.value - 1
         if (index === -1) {
-          index = list.length - 1;
+          index = list.length - 1
         }
-        store.commit("setCurrentIndex", index);
+        store.commit("setCurrentIndex", index)
         /* 如果目前播放的歌曲是暂停的，并且想回到上一首,那么回到上一首就会播放 */
         if (playing.value === false) {
-          store.commit("setPlayingState", true);
+          store.commit("setPlayingState", true)
         }
       }
     }
 
     function next() {
       /* 环形播放 */
-      const list = playlist.value;
-      if (!list.length) {
-        return;
+      const list = playlist.value
+      if (!songReady.value || !list.length) {
+        return
       }
       if (list.length === 1) {
-        loop();
+        loop()
       } else {
-        let index = currentIndex.value + 1;
+        let index = currentIndex.value + 1
         if (index === list.length) {
           //第一首歌
-          index = 0;
+          index = 0
         }
-        store.commit("setCurrentIndex", index);
+        store.commit("setCurrentIndex", index)
         /* 如果目前播放的歌曲是暂停的，并且想回到上一首,那么回到上一首就会播放 */
         if (playing.value === false) {
-          store.commit("setPlayingState", true);
+          store.commit("setPlayingState", true)
         }
       }
     }
 
     function loop() {
-      const audioEl = audioRef.value;
+      const audioEl = audioRef.value
       //从头播放
-      audioEl.currentTime = 0;
-      audioEl.play();
+      audioEl.currentTime = 0
+      audioEl.play()
+    }
+
+    function ready() {
+      if (songReady.value === true) {
+        return
+      }
+      songReady.value = true
+    }
+
+    function error() {
+        /* 发生歌曲播放错误的时候也允许前进和后退 */
+        songReady.value = true
     }
     return {
       /* computed */
@@ -164,8 +191,12 @@ export default {
       togglePlay,
       pause,
       prev,
-      next
-    };
+      next,
+      ready,
+      error,
+      /* style */
+      disableCls
+    }
   }
 };
 </script>
