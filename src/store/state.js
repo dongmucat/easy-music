@@ -1,4 +1,4 @@
-import { PLAY_MODE, SEARCH_KEY } from '@/assets/js/constant'
+import { PLAY_MODE, SEARCH_KEY, FAVORITE_KEY } from '@/assets/js/constant'
 import { load } from '@/assets/js/array-store'
 
 /* 定义全局共享数据 */
@@ -14,7 +14,8 @@ const state = {
   currentIndex: 0,
   /* 播放器的状态（全屏或者是收缩） */
   fullScreen: false,
-  favoriteList: [],
+  /* 收藏列表 */
+  favoriteList: load(FAVORITE_KEY),
   searchHistory: load(SEARCH_KEY),
   playHistory: []
 }

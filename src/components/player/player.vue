@@ -53,7 +53,10 @@
             ></i>
           </div>
           <div class="icon i-right">
-            <i class="icon-not-favorite"></i>
+            <i
+              :class="getFavoriteIcon(currentSong)"
+              @click="toggleFavorite(currentSong)"
+            ></i>
           </div>
         </div>
       </div>
@@ -71,6 +74,7 @@
 import { useStore } from "vuex"
 import { computed, watch, ref } from "vue"
 import useMode from './use-mode'
+import useFavorite from './use-favorite'
 export default {
   name: "player",
   setup() {
@@ -94,6 +98,7 @@ export default {
 
     /* hooks */
     const { modeIcon, changeMode } = useMode()
+    const { getFavoriteIcon, toggleFavorite } = useFavorite()
     /* watch */
     watch(currentSong, newSong => {
       if (!newSong.id && !newSong.url) {
@@ -209,6 +214,8 @@ export default {
       ready,
       error,
       changeMode,
+      getFavoriteIcon,
+      toggleFavorite,
       /* style */
       disableCls,
       modeIcon
