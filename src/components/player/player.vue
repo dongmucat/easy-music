@@ -20,21 +20,33 @@
       <div class="bottom">
         <div class="operators">
           <div class="icon i-left">
-            <i class="icon-sequence"></i>
+            <i
+              :class="modeIcon"
+              @click="changeMode"
+            ></i>
           </div>
-          <div class="icon i-left" :class="disableCls">
+          <div
+            class="icon i-left"
+            :class="disableCls"
+          >
             <i
               class="icon-prev"
               @click="prev"
             ></i>
           </div>
-          <div class="icon i-center" :class="disableCls">
+          <div
+            class="icon i-center"
+            :class="disableCls"
+          >
             <i
               :class="playIcon"
               @click="togglePlay"
             ></i>
           </div>
-          <div class="icon i-right" :class="disableCls">
+          <div
+            class="icon i-right"
+            :class="disableCls"
+          >
             <i
               class="icon-next"
               @click="next"
@@ -56,12 +68,12 @@
 </template>
 
 <script>
-import { useStore } from "vuex";
-import { computed, watch, ref } from "vue";
+import { useStore } from "vuex"
+import { computed, watch, ref } from "vue"
+import useMode from './use-mode'
 export default {
   name: "player",
-  components: {},
-  setup(props) {
+  setup() {
     /* data */
     const audioRef = ref(null)
     const songReady = ref(false)
@@ -76,11 +88,13 @@ export default {
     });
     const currentIndex = computed(() => store.state.currentIndex)
     const playlist = computed(() => store.state.playlist)
-    const disableCls = computed(()=>{
-        return songReady.value ? '': 'disable'
+    const disableCls = computed(() => {
+      return songReady.value ? '' : 'disable'
     })
 
-    /* 监视 */
+    /* hooks */
+    const { modeIcon, changeMode } = useMode()
+    /* watch */
     watch(currentSong, newSong => {
       if (!newSong.id && !newSong.url) {
         return
@@ -101,15 +115,15 @@ export default {
       newPlaying ? audioEl.play() : audioEl.pause()
     });
 
-    // methods
+    /* methods */
     function goBack() {
       store.commit("setFullScreen", false)
     }
 
     function togglePlay() {
-        if (!songReady.value) {
-            return
-        }
+      if (!songReady.value) {
+        return
+      }
       store.commit("setPlayingState", !playing.value)
     }
 
@@ -176,8 +190,8 @@ export default {
     }
 
     function error() {
-        /* 发生歌曲播放错误的时候也允许前进和后退 */
-        songReady.value = true
+      /* 发生歌曲播放错误的时候也允许前进和后退 */
+      songReady.value = true
     }
     return {
       /* computed */
@@ -194,8 +208,11 @@ export default {
       next,
       ready,
       error,
+      changeMode,
       /* style */
-      disableCls
+      disableCls,
+      modeIcon
+
     }
   }
 };

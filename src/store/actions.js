@@ -22,6 +22,7 @@ export function randomPlay({ commit }, list) {
 export function changeMode({ commit, state, getters }, mode) {
   const currentId = getters.currentSong.id
   if (mode === PLAY_MODE.random) {
+    /* 随机模式需要重新打乱顺序 */
     commit('setPlaylist', shuffle(state.sequenceList))
   } else {
     commit('setPlaylist', state.sequenceList)
