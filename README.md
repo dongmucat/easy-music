@@ -1,5 +1,5 @@
 # easy-music
-移动端
+VUE3网易云移动端
 ## Project setup
 ```
 npm install
