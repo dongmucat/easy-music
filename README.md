@@ -1,5 +1,5 @@
 # easy-music
-
+移动端
 ## Project setup
 ```
 npm install
