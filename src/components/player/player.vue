@@ -18,6 +18,13 @@
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
       <div class="bottom">
+        <div class="progress-wrapper">
+          <span class="time time-l">{{formatTime(currentTime)}}</span>
+          <div class="progress-bar-wrapper">
+            <progress-bar :progress="progress"></progress-bar>
+          </div>
+          <span class="time time-r">{{formatTime(currentSong.duration)}}</span>
+        </div>
         <div class="operators">
           <div class="icon i-left">
             <i
@@ -66,6 +73,7 @@
       @pause="pause"
       @canplay="ready"
       @error="error"
+      @timeupdate="updateTime"
     ></audio>
   </div>
 </template>
@@ -75,12 +83,18 @@ import { useStore } from "vuex"
 import { computed, watch, ref } from "vue"
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
+import ProgressBar from './progress-bar'
+import { formatTime } from '@/assets/js/util'
 export default {
   name: "player",
+  components: {
+    ProgressBar
+  },
   setup() {
     /* data */
     const audioRef = ref(null)
     const songReady = ref(false)
+    const currentTime = ref(0)
     /* vuex */
     const store = useStore()
     /* computed*/
@@ -95,6 +109,9 @@ export default {
     const disableCls = computed(() => {
       return songReady.value ? '' : 'disable'
     })
+    const progress = computed(() => {
+      return currentTime.value / currentSong.value.duration
+    })
 
     /* hooks */
     const { modeIcon, changeMode } = useMode()
@@ -105,6 +122,7 @@ export default {
         return
       }
       /* 歌曲发生变化的时候songReady.value为false */
+      currentTime.value = 0
       songReady.value = false
       const audioEl = audioRef.value
       audioEl.src = newSong.url
@@ -198,11 +216,19 @@ export default {
       /* 发生歌曲播放错误的时候也允许前进和后退 */
       songReady.value = true
     }
+
+    function updateTime(e) {
+      currentTime.value = e.target.currentTime
+    }
+
     return {
+      /* ref */
+      currentTime,
       /* computed */
       fullScreen,
       currentSong,
       playIcon,
+      progress,
       /* watch */
       audioRef,
       /* methods */
@@ -216,10 +242,11 @@ export default {
       changeMode,
       getFavoriteIcon,
       toggleFavorite,
+      updateTime,
+      formatTime,
       /* style */
       disableCls,
       modeIcon
-
     }
   }
 };
