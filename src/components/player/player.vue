@@ -74,6 +74,7 @@
       @canplay="ready"
       @error="error"
       @timeupdate="updateTime"
+      @ended="end"
     ></audio>
   </div>
 </template>
@@ -85,6 +86,8 @@ import useMode from './use-mode'
 import useFavorite from './use-favorite'
 import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
+import { PLAY_MODE } from '@/assets/js/constant'
+
 export default {
   name: "player",
   components: {
@@ -112,7 +115,7 @@ export default {
     const progress = computed(() => {
       return currentTime.value / currentSong.value.duration
     })
-
+    const playMode = computed(() => store.state.playMode)
     /* hooks */
     const { modeIcon, changeMode } = useMode()
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
@@ -221,6 +224,14 @@ export default {
       currentTime.value = e.target.currentTime
     }
 
+    function end() {
+      currentTime.value = 0
+      if (playMode.value === PLAY_MODE.loop) {
+        loop()
+      } else {
+        next()
+      }
+    }
     return {
       /* ref */
       currentTime,
@@ -244,6 +255,7 @@ export default {
       toggleFavorite,
       updateTime,
       formatTime,
+      end,
       /* style */
       disableCls,
       modeIcon
