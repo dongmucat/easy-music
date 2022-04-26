@@ -23,102 +23,108 @@
 </template>
 
 <script>
-  const progressBtnWidth = 16
+const progressBtnWidth = 16
 
-  export default {
-    name: 'progress-bar',
-    emits: ['progress-changing', 'progress-changed'],
-    props: {
-      progress: {
-        type: Number,
-        default: 0
-      }
+export default {
+  name: 'progress-bar',
+  emits: ['progress-changing', 'progress-changed'],
+  props: {
+    progress: {
+      type: Number,
+      default: 0
+    }
+  },
+  data() {
+    return {
+      /* 偏移量 */
+      offset: 0
+    }
+  },
+  computed: {
+    progressStyle() {
+      return `width:${this.offset}px`
     },
-    data() {
-      return {
-        offset: 0
-      }
+    btnStyle() {
+      return `transform:translate3d(${this.offset}px,0,0)`
+    }
+  },
+  watch: {
+    progress(newProgress) {
+      this.setOffset(newProgress)
+    }
+  },
+  created() {
+    this.touch = {}
+  },
+  methods: {
+    /* 获取刚开始移动的坐标数据 */
+    onTouchStart(e) {
+      this.touch.x1 = e.touches[0].pageX
+      this.touch.beginWidth = this.$refs.progress.clientWidth
     },
-    computed: {
-      progressStyle() {
-        return `width:${this.offset}px`
-      },
-      btnStyle() {
-        return `transform:translate3d(${this.offset}px,0,0)`
-      }
+    /* 获取移动时候的progress和 offset*/
+    onTouchMove(e) {
+      const delta = e.touches[0].pageX - this.touch.x1
+      const tempWidth = this.touch.beginWidth + delta
+      const barWidth = this.$el.clientWidth - progressBtnWidth
+      const progress = Math.min(1, Math.max(tempWidth / barWidth, 0))
+      this.offset = barWidth * progress
+      this.$emit('progress-changing', progress)
     },
-    watch: {
-      progress(newProgress) {
-        this.setOffset(newProgress)
-      }
+    /* 当移动结束的时候，获取progress*/
+    onTouchEnd() {
+      const barWidth = this.$el.clientWidth - progressBtnWidth
+      const progress = this.$refs.progress.clientWidth / barWidth
+      this.$emit('progress-changed', progress)
     },
-    created() {
-      this.touch = {}
+    /* 点击进度条事件 */
+    onClick(e) {
+      const rect = this.$el.getBoundingClientRect()
+      const offsetWidth = e.pageX - rect.left
+      const barWidth = this.$el.clientWidth - progressBtnWidth
+      const progress = offsetWidth / barWidth
+      this.$emit('progress-changed', progress)
     },
-    methods: {
-      onTouchStart(e) {
-        this.touch.x1 = e.touches[0].pageX
-        this.touch.beginWidth = this.$refs.progress.clientWidth
-      },
-      onTouchMove(e) {
-        const delta = e.touches[0].pageX - this.touch.x1
-        const tempWidth = this.touch.beginWidth + delta
-        const barWidth = this.$el.clientWidth - progressBtnWidth
-        const progress = Math.min(1, Math.max(tempWidth / barWidth, 0))
-        this.offset = barWidth * progress
-        this.$emit('progress-changing', progress)
-      },
-      onTouchEnd() {
-        const barWidth = this.$el.clientWidth - progressBtnWidth
-        const progress = this.$refs.progress.clientWidth / barWidth
-        this.$emit('progress-changed', progress)
-      },
-      onClick(e) {
-        const rect = this.$el.getBoundingClientRect()
-        const offsetWidth = e.pageX - rect.left
-        const barWidth = this.$el.clientWidth - progressBtnWidth
-        const progress = offsetWidth / barWidth
-        this.$emit('progress-changed', progress)
-      },
-      setOffset(progress) {
-        const barWidth = this.$el.clientWidth - progressBtnWidth
-        this.offset = barWidth * progress
-      }
+    /* 获取offset偏移量 */
+    setOffset(progress) {
+      const barWidth = this.$el.clientWidth - progressBtnWidth
+      this.offset = barWidth * progress
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
-  .progress-bar {
-    height: 30px;
-    .bar-inner {
-      position: relative;
-      top: 13px;
-      height: 4px;
-      background: rgba(0, 0, 0, 0.3);
-      .progress {
-        position: absolute;
-        height: 100%;
+.progress-bar {
+  height: 30px;
+  .bar-inner {
+    position: relative;
+    top: 13px;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    .progress {
+      position: absolute;
+      height: 100%;
+      background: $color-theme;
+    }
+    .progress-btn-wrapper {
+      position: absolute;
+      left: -8px;
+      top: -13px;
+      width: 30px;
+      height: 30px;
+      .progress-btn {
+        position: relative;
+        top: 7px;
+        left: 7px;
+        box-sizing: border-box;
+        width: 16px;
+        height: 16px;
+        border: 3px solid $color-text;
+        border-radius: 50%;
         background: $color-theme;
-      }
-      .progress-btn-wrapper {
-        position: absolute;
-        left: -8px;
-        top: -13px;
-        width: 30px;
-        height: 30px;
-        .progress-btn {
-          position: relative;
-          top: 7px;
-          left: 7px;
-          box-sizing: border-box;
-          width: 16px;
-          height: 16px;
-          border: 3px solid $color-text;
-          border-radius: 50%;
-          background: $color-theme;
-        }
       }
     }
   }
+}
 </style>

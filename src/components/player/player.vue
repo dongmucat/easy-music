@@ -21,7 +21,11 @@
         <div class="progress-wrapper">
           <span class="time time-l">{{formatTime(currentTime)}}</span>
           <div class="progress-bar-wrapper">
-            <progress-bar :progress="progress"></progress-bar>
+            <progress-bar
+              :progress="progress"
+              @progress-changing="onProgressChanging"
+              @progress-changed="onProgressChanged"
+            ></progress-bar>
           </div>
           <span class="time time-r">{{formatTime(currentSong.duration)}}</span>
         </div>
@@ -98,6 +102,7 @@ export default {
     const audioRef = ref(null)
     const songReady = ref(false)
     const currentTime = ref(0)
+    let progressChanging = false
     /* vuex */
     const store = useStore()
     /* computed*/
@@ -129,7 +134,10 @@ export default {
       songReady.value = false
       const audioEl = audioRef.value
       audioEl.src = newSong.url
-      audioEl.play()
+      /* 歌曲播放的时候，进行500ms缓冲 */
+      setTimeout(() => {
+        audioEl.play()
+      }, 500)
     });
 
     watch(playing, newPlaying => {
@@ -194,8 +202,8 @@ export default {
           index = 0
         }
         store.commit("setCurrentIndex", index)
-        /* 如果目前播放的歌曲是暂停的，并且想回到上一首,那么回到上一首就会播放 */
-        if (playing.value === false) {
+        /* 如果目前播放的歌曲是暂停的，并且想切换歌曲，那么下一首歌曲会播放 */
+        if (!playing.value) {
           store.commit("setPlayingState", true)
         }
       }
@@ -221,7 +229,9 @@ export default {
     }
 
     function updateTime(e) {
-      currentTime.value = e.target.currentTime
+      if (!progressChanging) {
+        currentTime.value = e.target.currentTime
+      }
     }
 
     function end() {
@@ -230,6 +240,20 @@ export default {
         loop()
       } else {
         next()
+      }
+    }
+
+    function onProgressChanging(progress) {
+      progressChanging = true
+      currentTime.value = currentSong.value.duration * progress
+    }
+
+    function onProgressChanged(progress) {
+      progressChanging = false
+      audioRef.value.currentTime = currentTime.value = currentSong.value.duration * progress
+      /* 如果现在歌曲是暂停的，那么拖动进度条后会播放 */
+      if (!playing.value) {
+        store.commit('setPlayingState', true)
       }
     }
     return {
@@ -256,6 +280,8 @@ export default {
       updateTime,
       formatTime,
       end,
+      onProgressChanging,
+      onProgressChanged,
       /* style */
       disableCls,
       modeIcon
