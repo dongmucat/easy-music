@@ -6,6 +6,8 @@ export default function useLyric({ songReady, currentTime }) {
     const lyricListRef = ref(null)
     const lyricScrollRef = ref(null)
     const currentLyric = ref(null)
+    const pureMusicLyric = ref('')
+    const playingLyric = ref('')
     const currentLineNum = ref(0)
     const store = useStore()
     const currentSong = computed(() => store.getters.currentSong)
@@ -15,10 +17,12 @@ export default function useLyric({ songReady, currentTime }) {
         if (!newSong.url || !newSong.id) {
             return
         }
-        /* 清理上一个currentLyric和currentLineNum缓存 */
+        /* 清理缓存 */
         stopLyric()
         currentLyric.value = null
         currentLineNum.value = 0
+        pureMusicLyric.value = ''
+        playingLyric.value = ''
 
         const lyric = await getLyric(newSong)
         store.commit('addSongLyric', {
@@ -31,13 +35,19 @@ export default function useLyric({ songReady, currentTime }) {
         }
 
         currentLyric.value = new Lyric(lyric, handleLyric)
-        if (songReady.value) {
-            playLyric()
+        const hasLyric = currentLyric.value.lines.length
+        if (hasLyric) {
+            if (songReady.value) {
+                playLyric()
+            }
+        } else {
+            playingLyric.value = pureMusicLyric.value = lyric.replace(/\[(\d{2}):(\d{2}):(\d{2})\]/g, '')
         }
     })
 
-    function handleLyric({ lineNum }) {
+    function handleLyric({ lineNum, txt }) {
         currentLineNum.value = lineNum
+        playingLyric.value = txt
         const scrollComp = lyricScrollRef.value
         const listEl = lyricListRef.value
         if (!listEl) {
@@ -71,7 +81,9 @@ export default function useLyric({ songReady, currentTime }) {
         playLyric,
         stopLyric,
         lyricListRef,
-        lyricScrollRef
+        lyricScrollRef,
+        pureMusicLyric,
+        playingLyric
     }
 
 }
