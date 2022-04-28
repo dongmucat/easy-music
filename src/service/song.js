@@ -23,9 +23,11 @@ export function processSongs(songs) {
 const lyricMap = {}
 
 export function getLyric(song) {
+  /* 如果该歌曲已经有了歌词，则不需要再发送请求 */
   if (song.lyric) {
     return Promise.resolve(song.lyric)
   }
+  /* 闭包，保留lyricMap: mid ->  lyric ，因为在不同的场景mid是相同的*/
   const mid = song.mid
   const lyric = lyricMap[mid]
   if (lyric) {
@@ -35,7 +37,7 @@ export function getLyric(song) {
   return get('/api/getLyric', {
     mid
   }).then((result) => {
-    const lyric = result ? result.lyric : '[00:00:00]该歌曲暂时无法获取歌词'
+    const lyric = result ? result.lyric : '[00:00:00]该歌曲暂时无法获取歌词~'
     lyricMap[mid] = lyric
     return lyric
   })

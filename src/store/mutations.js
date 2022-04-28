@@ -21,11 +21,10 @@ const mutations = {
     state.favoriteList = list
   },
   addSongLyric(state, { song, lyric }) {
-    state.sequenceList.map((item) => {
+    state.playlist.forEach((item) => {
       if (item.mid === song.mid) {
         item.lyric = lyric
       }
-      return item
     })
   },
   setSearchHistory(state, searches) {
