@@ -17,6 +17,23 @@
         <h1 class="title">{{ currentSong.name }}</h1>
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
+      <div class="middle">
+        <div class="middle-l">
+          <div class="cd-wrapper">
+            <div
+              ref="cdRef"
+              class="cd"
+            >
+              <img
+                class="image"
+                ref="cdImageRef"
+                :class="cdCls"
+                :src="currentSong.pic"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="bottom">
         <div class="progress-wrapper">
           <span class="time time-l">{{formatTime(currentTime)}}</span>
@@ -91,7 +108,7 @@ import useFavorite from './use-favorite'
 import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
-
+import useCd from './use-cd'
 export default {
   name: "player",
   components: {
@@ -124,6 +141,7 @@ export default {
     /* hooks */
     const { modeIcon, changeMode } = useMode()
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
+    const { cdCls, cdRef, cdImageRef } = useCd()
     /* watch */
     watch(currentSong, newSong => {
       if (!newSong.id && !newSong.url) {
@@ -264,8 +282,10 @@ export default {
       currentSong,
       playIcon,
       progress,
-      /* watch */
+      /* ref */
       audioRef,
+      cdRef,
+      cdImageRef,
       /* methods */
       goBack,
       togglePlay,
@@ -284,7 +304,8 @@ export default {
       onProgressChanged,
       /* style */
       disableCls,
-      modeIcon
+      modeIcon,
+      cdCls
     }
   }
 };
