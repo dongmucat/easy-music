@@ -17,8 +17,16 @@
         <h1 class="title">{{ currentSong.name }}</h1>
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
-      <div class="middle">
-        <div class="middle-l">
+      <div
+        class="middle"
+        @touchstart.prevent="onMiddleTouchStart"
+        @touchmove.prevent="onMiddleTouchMove"
+        @touchend.prevent="onMiddleTouchEnd"
+      >
+        <div
+          class="middle-l"
+          :style="middleLStyle"
+        >
           <div class="cd-wrapper">
             <div
               ref="cdRef"
@@ -39,6 +47,7 @@
         <scroll
           class="middle-r"
           ref="lyricScrollRef"
+          :style="middleRStyle"
         >
           <div class="lyric-wrapper">
             <div
@@ -64,6 +73,16 @@
         </scroll>
       </div>
       <div class="bottom">
+        <div class="dot-wrapper">
+          <span
+            class="dot"
+            :class="{'active':currentShow === 'cd'}"
+          ></span>
+          <span
+            class="dot"
+            :class="{'active':currentShow === 'lyric'}"
+          ></span>
+        </div>
         <div class="progress-wrapper">
           <span class="time time-l">{{formatTime(currentTime)}}</span>
           <div class="progress-bar-wrapper">
@@ -140,6 +159,7 @@ import useMode from './use-mode'
 import useFavorite from './use-favorite'
 import useCd from './use-cd'
 import useLyric from './use-lyric'
+import useMiddleInteractive from './use-middle-interactive'
 export default {
   name: "player",
   components: {
@@ -174,8 +194,8 @@ export default {
     const { modeIcon, changeMode } = useMode()
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
     const { cdCls, cdRef, cdImageRef } = useCd()
-    const { currentLyric, currentLineNum, playLyric, stopLyric, lyricScrollRef,
-      lyricListRef, pureMusicLyric, playingLyric } = useLyric({ songReady, currentTime })
+    const { currentLyric, currentLineNum, playLyric, stopLyric, lyricScrollRef, lyricListRef, pureMusicLyric, playingLyric } = useLyric({ songReady, currentTime })
+    const { currentShow, middleLStyle, middleRStyle, onMiddleTouchStart, onMiddleTouchMove, onMiddleTouchEnd } = useMiddleInteractive()
     /* watch */
     watch(currentSong, newSong => {
       if (!newSong.id && !newSong.url) {
@@ -353,10 +373,16 @@ export default {
       end,
       onProgressChanging,
       onProgressChanged,
+      onMiddleTouchStart,
+      onMiddleTouchMove,
+      onMiddleTouchEnd,
       /* style */
       disableCls,
       modeIcon,
-      cdCls
+      cdCls,
+      currentShow,
+      middleLStyle,
+      middleRStyle
     }
   }
 };
