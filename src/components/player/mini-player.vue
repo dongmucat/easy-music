@@ -24,6 +24,19 @@
         <h2 class="name">{{currentSong.name}}</h2>
         <p class="desc">{{currentSong.singer}}</p>
       </div>
+
+      <div class="control">
+        <progress-circle
+          :radius="32"
+          :progress="progress"
+        >
+          <i
+            class="icon-mini"
+            :class="miniPlayIcon"
+            @click.stop="togglePlay"
+          ></i>
+        </progress-circle>
+      </div>
     </div>
   </transition>
 </template>
@@ -32,17 +45,29 @@
 import { useStore } from "vuex"
 import { computed } from 'vue'
 import useCd from './use-cd'
+import ProgressCircle from './progress-circle'
+
 export default {
   name: 'mini-player',
   components: {
+    ProgressCircle
   },
   props: {
+    progress: {
+      type: Number,
+      default: 0
+    },
+    togglePlay: Function
   },
   setup() {
     // vuex
     const store = useStore()
     const fullScreen = computed(() => store.state.fullScreen)
     const currentSong = computed(() => store.getters.currentSong)
+    const playing = computed(() => store.state.playing)
+    const miniPlayIcon = computed(() => {
+      return playing.value ? 'icon-pause-mini' : 'icon-play-mini'
+    })
     // hooks
     const { cdCls, cdRef, cdImageRef } = useCd()
 
@@ -59,7 +84,9 @@ export default {
       cdRef,
       cdImageRef,
       // methods
-      showNormalPlayer
+      showNormalPlayer,
+      // cls
+      miniPlayIcon
     }
   }
 }

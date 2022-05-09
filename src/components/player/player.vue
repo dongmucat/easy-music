@@ -90,6 +90,7 @@
           <span class="time time-l">{{formatTime(currentTime)}}</span>
           <div class="progress-bar-wrapper">
             <progress-bar
+              ref="barRef"
               :progress="progress"
               @progress-changing="onProgressChanging"
               @progress-changed="onProgressChanged"
@@ -140,7 +141,10 @@
         </div>
       </div>
     </div>
-    <mini-player></mini-player>
+    <mini-player
+      :progress="progress"
+      :togglePlay="togglePlay"
+    ></mini-player>
     <audio
       ref="audioRef"
       @pause="pause"
@@ -154,7 +158,7 @@
 
 <script>
 import { useStore } from "vuex"
-import { computed, watch, ref } from "vue"
+import { computed, watch, ref, nextTick } from "vue"
 import ProgressBar from './progress-bar'
 import Scroll from '@/components/base/scroll/scroll'
 import MiniPlayer from './mini-player'
@@ -177,6 +181,7 @@ export default {
     const audioRef = ref(null)
     const songReady = ref(false)
     const currentTime = ref(0)
+    const barRef = ref(null)
     let progressChanging = false
     /* vuex */
     const store = useStore()
@@ -232,6 +237,13 @@ export default {
         stopLyric()
       }
     });
+
+    watch(fullScreen, async (newFullScreen) => {
+      if (newFullScreen) {
+        await nextTick()
+        barRef.value.setOffset(progress.value)
+      }
+    })
 
     /* methods */
     function goBack() {
@@ -350,6 +362,7 @@ export default {
       playingLyric,
       /* ref */
       currentTime,
+      barRef,
       /* computed */
       fullScreen,
       currentSong,
