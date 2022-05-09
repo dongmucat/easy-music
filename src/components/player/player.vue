@@ -1,5 +1,8 @@
 <template>
-  <div class="player">
+  <div
+    class="player"
+    v-show="playlist.length"
+  >
     <div
       class="normal-player"
       v-show="fullScreen"
@@ -137,6 +140,7 @@
         </div>
       </div>
     </div>
+    <mini-player></mini-player>
     <audio
       ref="audioRef"
       @pause="pause"
@@ -153,6 +157,7 @@ import { useStore } from "vuex"
 import { computed, watch, ref } from "vue"
 import ProgressBar from './progress-bar'
 import Scroll from '@/components/base/scroll/scroll'
+import MiniPlayer from './mini-player'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
 import useMode from './use-mode'
@@ -164,7 +169,8 @@ export default {
   name: "player",
   components: {
     ProgressBar,
-    Scroll
+    Scroll,
+    MiniPlayer
   },
   setup() {
     /* data */
@@ -349,6 +355,7 @@ export default {
       currentSong,
       playIcon,
       progress,
+      playlist,
       /* ref */
       audioRef,
       cdRef,
