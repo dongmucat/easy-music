@@ -4,36 +4,27 @@
       <div>
         <div class="slider-wrapper">
           <div class="slider-content">
-            <slider
-              v-if="sliders.length"
-              :sliders="sliders"
-            ></slider>
+            <slider v-if="sliders.length" :sliders="sliders"></slider>
           </div>
         </div>
         <div class="recommend-list">
-          <h1
-            class="list-title"
-            v-show="!loading"
-          >热 门 歌 单 推 荐</h1>
+          <h1 class="list-title" v-show="!loading">热 门 歌 单 推 荐</h1>
           <ul>
             <li
               v-for="item in albums"
               class="item"
               :key="item.id"
+              @click="selectItem(item)"
             >
               <div class="icon">
-                <img
-                  width="60"
-                  height="60"
-                  v-lazy="item.pic"
-                >
+                <img width="60" height="60" v-lazy="item.pic" />
               </div>
               <div class="text">
                 <h2 class="name">
                   {{ item.username }}
                 </h2>
                 <p class="title">
-                  {{item.title}}
+                  {{ item.title }}
                 </p>
               </div>
             </li>
@@ -41,6 +32,11 @@
         </div>
       </div>
     </scroll>
+    <router-view v-slot="{ Component }">
+      <transition appear name="slide">
+        <component :is="Component" :data="selectedAlbum" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -48,6 +44,8 @@
 import { getRecommend } from '@/service/recommend'
 import Slider from '@/components/base/slider/slider'
 import Scroll from '../components/base/scroll/scroll'
+import storage from 'good-storage'
+import { ALBUM_KEY } from '@/assets/js/constant'
 export default {
   name: 'recommend',
   components: {
@@ -63,15 +61,26 @@ export default {
     return {
       sliders: [],
       albums: [],
-      loadingText:'正在载入,请稍等~~~'
+      selectedAlbum: null
     }
   },
   computed: {
     loading() {
       return !this.sliders.length && !this.albums.length
     }
+  },
+  methods: {
+    selectItem(album) {
+      this.selectedAlbum = album
+      this.cacheAlbum(album)
+      this.$router.push({
+        path: `/recommend/${album.id}`
+      })
+    },
+    cacheAlbum(album) {
+      storage.session.set(ALBUM_KEY, album)
+    }
   }
-
 }
 </script>
 
@@ -139,4 +148,3 @@ export default {
   }
 }
 </style>
-
