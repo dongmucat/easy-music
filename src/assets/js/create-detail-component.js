@@ -45,7 +45,6 @@ export default function createDetailComponent(name, key, fetch) {
     },
     async created() {
       const data = this.computedData
-      console.log(this.$route)
       if (!data) {
         // 如果没有data则跳转到 /top-list
         const path = this.$route.matched[0].path
