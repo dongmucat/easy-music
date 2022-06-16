@@ -3,39 +3,43 @@
     <div class="search-input-wrapper">
       <search-input v-model="query"></search-input>
     </div>
-
-    <div
+    <scroll
+      ref="scrollRef"
       class="search-content"
       v-show="!query"
     >
-      <div class="hot-keys">
-        <h1 class="title">热门搜索</h1>
-        <ul>
-          <li
-            class="item"
-            v-for="item in hotKeys"
-            :key="item.id"
-            @click="addQuery(item.key)"
-          >
-            <span>{{ item.key }}</span>
-          </li>
-        </ul>
-      </div>
       <div
-        class="search-history"
-        v-show="searchHistory.length"
+        class="search-content"
+        v-show="!query"
       >
-        <h1 class="title">
-          <span class="text">搜索历史</span>
-        </h1>
-        <search-list
-          :searches="searchHistory"
-          @select="addQuery"
-          @delete="deleteSearch"
-        ></search-list>
+        <div class="hot-keys">
+          <h1 class="title">热门搜索</h1>
+          <ul>
+            <li
+              class="item"
+              v-for="item in hotKeys"
+              :key="item.id"
+              @click="addQuery(item.key)"
+            >
+              <span>{{ item.key }}</span>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="search-history"
+          v-show="searchHistory.length"
+        >
+          <h1 class="title">
+            <span class="text">搜索历史</span>
+          </h1>
+          <search-list
+            :searches="searchHistory"
+            @select="addQuery"
+            @delete="deleteSearch"
+          ></search-list>
+        </div>
       </div>
-    </div>
-
+    </scroll>
     <div
       class="search-result"
       v-show="query"
@@ -63,6 +67,7 @@
 <script>
 import SearchInput from '@/components/search/search-input'
 import SearchList from '@/components/base/search-list/search-list'
+import Scroll from '@/components/wrap-scroll'
 import Suggest from '@/components/search/suggest'
 import { ref, watch, computed } from 'vue'
 import { getHotKeys, search } from '@/service/search'
@@ -77,7 +82,8 @@ export default {
   components: {
     SearchInput,
     Suggest,
-    SearchList
+    SearchList,
+    Scroll
   },
   setup() {
     const query = ref('')
@@ -85,6 +91,7 @@ export default {
     const store = useStore()
     const router = useRouter()
     const selectedSinger = ref(null)
+    const scrollRef = ref(null)
     const searchHistory = computed(() => store.state.searchHistory)
     const { saveSearch, deleteSearch, clearSearch } = useSearchHistory()
 
@@ -111,11 +118,23 @@ export default {
       })
     }
 
+    watch(query, async (newQuery) => {
+      if (!newQuery) {
+        await nextTick()
+        refreshScroll()
+      }
+    })
+
+    function refreshScroll() {
+      scrollRef.value.scroll.refresh()
+    }
+
     function cacheSinger(singer) {
       storage.session.set(SINGER_KEY, singer)
     }
 
     return {
+      scrollRef,
       query,
       hotKeys,
       selectedSinger,
