@@ -21,7 +21,21 @@
           </li>
         </ul>
       </div>
+      <div
+        class="search-history"
+        v-show="searchHistory.length"
+      >
+        <h1 class="title">
+          <span class="text">搜索历史</span>
+        </h1>
+        <search-list
+          :searches="searchHistory"
+          @select="addQuery"
+          @delete="deleteSearch"
+        ></search-list>
+      </div>
     </div>
+
     <div
       class="search-result"
       v-show="query"
@@ -48,18 +62,22 @@
 
 <script>
 import SearchInput from '@/components/search/search-input'
+import SearchList from '@/components/base/search-list/search-list'
 import Suggest from '@/components/search/suggest'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { getHotKeys, search } from '@/service/search'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import storage from 'good-storage'
 import { SINGER_KEY } from '@/assets/js/constant'
+import useSearchHistory from '@/components/search/use-search-history'
+
 export default {
   name: 'search',
   components: {
     SearchInput,
-    Suggest
+    Suggest,
+    SearchList
   },
   setup() {
     const query = ref('')
@@ -67,6 +85,8 @@ export default {
     const store = useStore()
     const router = useRouter()
     const selectedSinger = ref(null)
+    const searchHistory = computed(() => store.state.searchHistory)
+    const { saveSearch, deleteSearch, clearSearch } = useSearchHistory()
 
     getHotKeys().then(result => {
       hotKeys.value = result.hotKeys
@@ -78,10 +98,12 @@ export default {
     }
 
     function selectSong(song) {
+      saveSearch(query.value)
       store.dispatch('addSong', song)
     }
 
     function selectSinger(singer) {
+      saveSearch(query.value)
       selectedSinger.value = singer
       cacheSinger(singer)
       router.push({
@@ -97,10 +119,14 @@ export default {
       query,
       hotKeys,
       selectedSinger,
+      searchHistory,
       // methods
       addQuery,
       selectSong,
-      selectSinger
+      selectSinger,
+      // searchHistory
+      deleteSearch,
+      clearSearch
     }
   }
 }
