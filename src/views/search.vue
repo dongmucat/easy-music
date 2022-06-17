@@ -31,7 +31,20 @@
         >
           <h1 class="title">
             <span class="text">搜索历史</span>
+            <span
+              class="clear"
+              @click="showConfirm"
+            >
+              <i class="icon-clear"></i>
+            </span>
           </h1>
+          <confirm
+            ref="confirmRef"
+            text="是否清空所有搜索历史"
+            confirm-btn-text="清空"
+            @confirm="clearSearch"
+          >
+          </confirm>
           <search-list
             :searches="searchHistory"
             @select="addQuery"
@@ -69,7 +82,8 @@ import SearchInput from '@/components/search/search-input'
 import SearchList from '@/components/base/search-list/search-list'
 import Scroll from '@/components/wrap-scroll'
 import Suggest from '@/components/search/suggest'
-import { ref, watch, computed } from 'vue'
+import Confirm from '@/components/base/confirm/confirm'
+import { ref, watch, computed, nextTick } from 'vue'
 import { getHotKeys, search } from '@/service/search'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -80,6 +94,7 @@ import useSearchHistory from '@/components/search/use-search-history'
 export default {
   name: 'search',
   components: {
+    Confirm,
     SearchInput,
     Suggest,
     SearchList,
@@ -92,6 +107,7 @@ export default {
     const router = useRouter()
     const selectedSinger = ref(null)
     const scrollRef = ref(null)
+    const confirmRef = ref(null)
     const searchHistory = computed(() => store.state.searchHistory)
     const { saveSearch, deleteSearch, clearSearch } = useSearchHistory()
 
@@ -132,8 +148,12 @@ export default {
     function cacheSinger(singer) {
       storage.session.set(SINGER_KEY, singer)
     }
+    function showConfirm() {
+      confirmRef.value.show()
+    }
 
     return {
+      confirmRef,
       scrollRef,
       query,
       hotKeys,
@@ -143,6 +163,7 @@ export default {
       addQuery,
       selectSong,
       selectSinger,
+      showConfirm,
       // searchHistory
       deleteSearch,
       clearSearch
