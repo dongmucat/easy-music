@@ -1,209 +1,199 @@
 <template>
-  <teleport to="body">
-    <transition name="list-fade">
-      <div
-        class="playlist"
-        v-show="visible && playlist.length"
-        @click="hide"
-      >
-        <div
-          class="list-wrapper"
-          @click.stop
-        >
-          <div class="list-header">
-            <h1 class="title">
-              <i
-                class="icon"
-                :class="modeIcon"
-                @click="changeMode"
-              >
-              </i>
-              <span class="text">{{modeText}}</span>
-              <span
-                class="clear"
-                @click="showConfirm"
-              >
-                <i class="icon-clear"></i>
-              </span>
-            </h1>
-          </div>
-          <scroll
-            ref="scrollRef"
-            class="list-content"
-          >
-            <transition-group
-              ref="listRef"
-              name="list"
-              tag="ul"
-            >
-              <li
-                class="item"
-                v-for="song in sequenceList"
-                :key="song.id"
-                @click="selectItem(song)"
-              >
-                <i
-                  class="current"
-                  :class="getCurrentIcon(song)"
-                ></i>
-                <span class="text">{{song.name}}</span>
-                <span
-                  class="favorite"
-                  @click.stop="toggleFavorite(song)"
-                >
-                  <i :class="getFavoriteIcon(song)"></i>
-                </span>
-                <span
-                  class="delete"
-                  @click.stop="removeSong(song)"
-                  :class="{'disable': removing}"
-                >
-                  <i class="icon-delete"></i>
-                </span>
-              </li>
-            </transition-group>
-          </scroll>
-        </div>
-        <confirm
-          ref="confirmRef"
-          @confirm="confirmClear"
-          text="是否清空播放列表？"
-          confirm-btn-text="清空"
-        ></confirm>
-        <add-song ref="addSongRef"></add-song>
-      </div>
-    </transition>
-  </teleport>
+	<teleport to="body">
+		<transition name="list-fade">
+			<div class="playlist" v-show="visible && playlist.length" @click="hide">
+				<div class="list-wrapper" @click.stop>
+					<div class="list-header">
+						<h1 class="title">
+							<i class="icon" :class="modeIcon" @click="changeMode"> </i>
+							<span class="text">{{ modeText }}</span>
+							<span class="clear" @click="showConfirm">
+								<i class="icon-clear"></i>
+							</span>
+						</h1>
+					</div>
+					<scroll ref="scrollRef" class="list-content">
+						<transition-group ref="listRef" name="list" tag="ul">
+							<li
+								class="item"
+								v-for="song in sequenceList"
+								:key="song.id"
+								@click="selectItem(song)"
+							>
+								<i class="current" :class="getCurrentIcon(song)"></i>
+								<span class="text">{{ song.name }}</span>
+								<span class="favorite" @click.stop="toggleFavorite(song)">
+									<i :class="getFavoriteIcon(song)"></i>
+								</span>
+								<span
+									class="delete"
+									@click.stop="removeSong(song)"
+									:class="{ disable: removing }"
+								>
+									<i class="icon-delete"></i>
+								</span>
+							</li>
+						</transition-group>
+					</scroll>
+					<div class="list-add">
+						<div class="add" @click="showAddSong">
+							<i class="icon-add"></i>
+							<span class="text">添加歌曲到队列</span>
+						</div>
+					</div>
+					<div class="list-footer" @click="hide">
+						<span>关闭</span>
+					</div>
+				</div>
+				<confirm
+					ref="confirmRef"
+					@confirm="confirmClear"
+					text="是否清空播放列表？"
+					confirm-btn-text="清空"
+				></confirm>
+				<add-song ref="addSongRef"></add-song>
+			</div>
+		</transition>
+	</teleport>
 </template>
 
 <script>
 import Scroll from '@/components/base/scroll/scroll'
 import Confirm from '@/components/base/confirm/confirm'
+import AddSong from '@/components/add-song/add-song'
 import { ref, computed, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
 
 export default {
-  name: 'playlist',
-  components: {
-    Confirm,
-    Scroll
-  },
-  setup() {
-    const visible = ref(false)
-    const removing = ref(false)
-    const scrollRef = ref(null)
-    const listRef = ref(null)
-    const confirmRef = ref(null)
+	name: 'playlist',
+	components: {
+		Confirm,
+		Scroll,
+		AddSong
+	},
+	setup() {
+		const visible = ref(false)
+		const removing = ref(false)
+		const scrollRef = ref(null)
+		const listRef = ref(null)
+		const confirmRef = ref(null)
+		const addSongRef = ref(null)
 
-    const store = useStore()
-    const playlist = computed(() => store.state.playlist)
-    const sequenceList = computed(() => store.state.sequenceList)
-    const currentSong = computed(() => store.getters.currentSong)
+		const store = useStore()
+		const playlist = computed(() => store.state.playlist)
+		const sequenceList = computed(() => store.state.sequenceList)
+		const currentSong = computed(() => store.getters.currentSong)
 
-    const { modeIcon, modeText, changeMode } = useMode()
-    const { getFavoriteIcon, toggleFavorite } = useFavorite()
+		const { modeIcon, modeText, changeMode } = useMode()
+		const { getFavoriteIcon, toggleFavorite } = useFavorite()
 
-    watch(currentSong, async (newSong) => {
-      if (!visible.value || !newSong.id) {
-        return
-      }
-      await nextTick()
-      scrollToCurrent()
-    })
+		watch(currentSong, async newSong => {
+			if (!visible.value || !newSong.id) {
+				return
+			}
+			await nextTick()
+			scrollToCurrent()
+		})
 
-    function getCurrentIcon(song) {
-      if (song.id === currentSong.value.id) {
-        return 'icon-play'
-      }
-    }
+		function getCurrentIcon(song) {
+			if (song.id === currentSong.value.id) {
+				return 'icon-play'
+			}
+		}
 
-    async function show() {
-      visible.value = true
+		async function show() {
+			visible.value = true
 
-      await nextTick()
-      refreshScroll()
-      scrollToCurrent()
-    }
+			await nextTick()
+			refreshScroll()
+			scrollToCurrent()
+		}
 
-    function hide() {
-      visible.value = false
-    }
+		function hide() {
+			visible.value = false
+		}
 
-    function selectItem(song) {
-      const index = playlist.value.findIndex((item) => {
-        return song.id === item.id
-      })
+		function selectItem(song) {
+			const index = playlist.value.findIndex(item => {
+				return song.id === item.id
+			})
 
-      store.commit('setCurrentIndex', index)
-      store.commit('setPlayingState', true)
-    }
+			store.commit('setCurrentIndex', index)
+			store.commit('setPlayingState', true)
+		}
 
-    function refreshScroll() {
-      scrollRef.value.scroll.refresh()
-    }
+		function refreshScroll() {
+			scrollRef.value.scroll.refresh()
+		}
 
-    function scrollToCurrent() {
-      const index = sequenceList.value.findIndex((song) => {
-        return currentSong.value.id === song.id
-      })
-      if (index === -1) {
-        return
-      }
-      const target = listRef.value.$el.children[index]
+		function scrollToCurrent() {
+			const index = sequenceList.value.findIndex(song => {
+				return currentSong.value.id === song.id
+			})
+			if (index === -1) {
+				return
+			}
+			const target = listRef.value.$el.children[index]
 
-      scrollRef.value.scroll.scrollToElement(target, 300)
-    }
+			scrollRef.value.scroll.scrollToElement(target, 300)
+		}
 
-    function removeSong(song) {
-      if (removing.value) {
-        return
-      }
-      removing.value = true
+		function removeSong(song) {
+			if (removing.value) {
+				return
+			}
+			removing.value = true
 
-      store.dispatch('removeSong', song)
-      if (!playlist.value.length) {
-        hide()
-      }
-      setTimeout(() => {
-        removing.value = false
-      }, 300)
-    }
+			store.dispatch('removeSong', song)
+			if (!playlist.value.length) {
+				hide()
+			}
+			setTimeout(() => {
+				removing.value = false
+			}, 300)
+		}
 
-    function showConfirm() {
-      confirmRef.value.show()
-    }
+		function showConfirm() {
+			confirmRef.value.show()
+		}
 
-    function confirmClear() {
-      store.dispatch('clearSongList')
-      hide()
-    }
+		function confirmClear() {
+			store.dispatch('clearSongList')
+			hide()
+		}
 
-    return {
-      visible,
-      removing,
-      scrollRef,
-      listRef,
-      confirmRef,
-      playlist,
-      sequenceList,
-      getCurrentIcon,
-      show,
-      hide,
-      selectItem,
-      removeSong,
-      showConfirm,
-      confirmClear,
-      // mode
-      modeIcon,
-      modeText,
-      changeMode,
-      // favorite
-      getFavoriteIcon,
-      toggleFavorite
-    }
-  }
+		function showAddSong() {
+			addSongRef.value.show()
+		}
+
+		return {
+			visible,
+			removing,
+			scrollRef,
+			addSongRef,
+			listRef,
+			confirmRef,
+			playlist,
+			sequenceList,
+			getCurrentIcon,
+			showAddSong,
+			show,
+			hide,
+			selectItem,
+			removeSong,
+			showConfirm,
+			confirmClear,
+			// mode
+			modeIcon,
+			modeText,
+			changeMode,
+			// favorite
+			getFavoriteIcon,
+			toggleFavorite
+		}
+	}
 }
 </script>
 

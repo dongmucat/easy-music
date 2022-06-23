@@ -175,6 +175,7 @@ import Scroll from '@/components/base/scroll/scroll'
 import MiniPlayer from './mini-player'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
+import usePlayHistory from './use-play-history'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
 import useCd from './use-cd'
@@ -220,6 +221,7 @@ export default {
     const { currentLyric, currentLineNum, playLyric, stopLyric, lyricScrollRef, lyricListRef, pureMusicLyric, playingLyric } = useLyric({ songReady, currentTime })
     const { currentShow, middleLStyle, middleRStyle, onMiddleTouchStart, onMiddleTouchMove, onMiddleTouchEnd } = useMiddleInteractive()
     const { cdWrapperRef, enter, afterEnter, leave, afterLeave } = useAnimation()
+    const { savePlay } = usePlayHistory()
     /* watch */
     watch(currentSong, newSong => {
       if (!newSong.id && !newSong.url) {
@@ -331,6 +333,7 @@ export default {
       }
       songReady.value = true
       playLyric()
+      savePlay(currentSong.value)
     }
 
     function error() {
