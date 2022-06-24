@@ -19,7 +19,7 @@
 					<div class="list-wrapper">
 						<!-- 最近播放 -->
 						<scroll
-							v-show="currentIndex === 0"
+							v-if="currentIndex === 0"
 							class="list-scroll"
 							ref="scrollRef"
 						>
@@ -30,7 +30,7 @@
 						</scroll>
 						<!-- 播放历史 -->
 						<scroll
-							v-show="currentIndex === 1"
+							v-if="currentIndex === 1"
 							class="list-scroll"
 							ref="scrollRef"
 						>
@@ -52,6 +52,12 @@
 					>
 					</suggest>
 				</div>
+				<message ref="messageRef">
+					<div class="message-title">
+						<i class="icon-ok"></i>
+						<span class="text">1首歌曲已经添加到播放列表</span>
+					</div>
+				</message>
 			</div>
 		</transition>
 	</teleport>
@@ -65,6 +71,7 @@ import Switches from '@/components/base/switches/switches'
 import Scroll from '@/components/base/scroll/scroll'
 import SearchList from '@/components/base/search-list/search-list'
 import SongList from '@/components/base/song-list/song-list'
+import Message from '@/components/base/message/message'
 // =====================hooks引用=====================
 import { ref, computed, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
@@ -78,7 +85,8 @@ export default {
 		SearchList,
 		SearchInput,
 		Suggest,
-		Scroll
+		Scroll,
+		Message
 	},
 	setup() {
 		// =====================变量声明=====================
@@ -92,6 +100,8 @@ export default {
 		const scrollRef = ref(null)
 		// vuex的store
 		const store = useStore()
+		// messageRef ，主要控制message的显示
+		const messageRef = ref(null)
 
 		// =====================computed=====================
 		const playHistory = computed(() => store.state.playHistory)
@@ -153,7 +163,6 @@ export default {
 		 */
 		function selectSongBySongList({ song }) {
 			addSong(song)
-			console.log('selectSongBySongList')
 		}
 
 		/**
@@ -161,7 +170,17 @@ export default {
 		 * @param {Object} song 歌曲
 		 */
 		function addSong(song) {
+			// 添加歌曲
 			store.dispatch('addSong', song)
+			// 展示Message组件，提示成功
+			showMessage()
+		}
+
+		/**
+		 * 显示Message组件
+		 */
+		function showMessage() {
+			messageRef.value.show()
 		}
 
 		return {
@@ -169,6 +188,7 @@ export default {
 			playHistory,
 			searchHistory,
 			// ref
+			messageRef,
 			scrollRef,
 			visible,
 			query,
@@ -192,19 +212,23 @@ export default {
 	width: 100%;
 	z-index: 300;
 	background: $color-background;
+
 	.header {
 		position: relative;
 		height: 44px;
 		text-align: center;
+
 		.title {
 			line-height: 44px;
 			font-size: $font-size-large;
 			color: $color-text;
 		}
+
 		.close {
 			position: absolute;
 			top: 0;
 			right: 8px;
+
 			.icon-close {
 				display: block;
 				padding: 12px;
@@ -213,22 +237,27 @@ export default {
 			}
 		}
 	}
+
 	.search-input-wrapper {
 		margin: 20px;
 	}
+
 	.list-wrapper {
 		position: absolute;
 		top: 165px;
 		bottom: 0;
 		width: 100%;
+
 		.list-scroll {
 			height: 100%;
 			overflow: hidden;
+
 			.list-inner {
 				padding: 20px 30px;
 			}
 		}
 	}
+
 	.search-result {
 		position: fixed;
 		top: 124px;
@@ -241,11 +270,13 @@ export default {
 	text-align: center;
 	padding: 18px 0;
 	font-size: 0;
+
 	.icon-ok {
 		font-size: $font-size-medium;
 		color: $color-theme;
 		margin-right: 4px;
 	}
+
 	.text {
 		font-size: $font-size-medium;
 		color: $color-text;
