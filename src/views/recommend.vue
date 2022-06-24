@@ -67,6 +67,9 @@ export default {
   computed: {
     loading() {
       return !this.sliders.length && !this.albums.length
+    },
+    loadingText(){
+      return '正在载入......请稍等~~'
     }
   },
   methods: {
