@@ -1,8 +1,19 @@
 <template>
-  <m-header></m-header>
-  <tab></tab>
-  <router-view></router-view>
-  <player></player>
+	<m-header></m-header>
+	<tab></tab>
+  <router-view :style="viewStyle" v-slot="{ Component }">
+    <keep-alive>
+      <component :is="Component"/>
+    </keep-alive>
+  </router-view>
+	<router-view :style="viewStyle" name="user" v-slot="{ Component }">
+		<transition appear name="slide">
+			<keep-alive>
+				<component :is="Component" />
+			</keep-alive>
+		</transition>
+	</router-view>
+	<player></player>
 </template>
 
 <script>
@@ -11,11 +22,10 @@ import Tab from '@/components/tab/tab'
 import Player from '@/components/player/player.vue'
 
 export default {
-  components: {
-    Player,
-    MHeader: Header,
-    Tab
-    
-  }
+	components: {
+		Player,
+		MHeader: Header,
+		Tab
+	}
 }
 </script>
