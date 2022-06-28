@@ -3,11 +3,12 @@ const compression = require('compression')
 const cookieParser = require('cookie-parser')
 const csrf = require('xsrf')
 const registerRouter = require('./router')
+const cors = require('cors')
 
 const port = process.env.PORT || 9002
 
 const app = express()
-
+app.use(cors())
 const csrfProtection = csrf({
   cookie: true,
   ignoreMethods: ['HEAD', 'OPTIONS'],
