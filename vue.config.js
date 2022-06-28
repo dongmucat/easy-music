@@ -26,5 +26,5 @@ module.exports = {
   //关闭eslint
   lintOnSave: false,
   productionSourceMap: false,
-  publicPath: process.env.NODE_ENV === 'production' ? '/music-next/' : '/'
+  //publicPath: process.env.NODE_ENV === 'production' ? '/easy-music/' : '/' */
 }
